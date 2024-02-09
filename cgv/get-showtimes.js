@@ -3,7 +3,12 @@ const cheerio = require("cheerio");
 const qs = require("qs");
 
 async function getCgvShowtimes(movieId, date) {
-  id = movieId.split("_")[1];
+  let id = "";
+  if (movieId.includes("_")) {
+    id = movieId.split("_")[1];
+  } else {
+    return [];
+  }
   let showtimes = [];
 
   let data = qs.stringify({
@@ -42,6 +47,7 @@ async function getCgvShowtimes(movieId, date) {
               let time = $(element).find("span").text();
               let cinema = $(element).attr("href").split("/")[8];
               showtimes.push({
+                cinemas_id: "CGV",
                 movie_id: movieId,
                 cinema_id: "cgv_site_" + cinema,
                 date: date,

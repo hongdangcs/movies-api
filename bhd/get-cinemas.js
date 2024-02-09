@@ -16,11 +16,15 @@ async function getBhdCinemas() {
       const cinemas = $(".post-item");
 
       const promises = cinemas.map(async (index, element) => {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        const cinema = $(element);
-        const cinemaLink = cinema.find("a").attr("href");
-        const cinemaDetails = await getBhdCinemaDetails(cinemaLink);
-        bhdCinemas.push(cinemaDetails);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          const cinema = $(element);
+          const cinemaLink = cinema.find("a").attr("href");
+          const cinemaDetails = await getBhdCinemaDetails(cinemaLink);
+          bhdCinemas.push(cinemaDetails);
+        } catch (error) {
+          console.log(error);
+        }
       });
 
       await Promise.all(promises.toArray());

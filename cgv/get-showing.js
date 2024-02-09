@@ -1,8 +1,6 @@
 async function getCgvShowing(browser) {
   const page = await browser.newPage();
   await page.goto("https://www.cgv.vn/default/movies/now-showing.html");
-  // wait for navigation
-  await page.waitForNavigation();
   const result = await page.evaluate(() => {
     let data = [];
     let elements = document.querySelectorAll(

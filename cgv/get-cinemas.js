@@ -21,19 +21,23 @@ async function getCgvCinemas() {
       let $ = cheerio.load(response.data);
       let cinemasList = $(".cinemas-list ul li");
       const promises = cinemasList.map(async (index, element) => {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        let cinemaName = $(element).find("span").text();
-        let cinemaId = $(element).find("span").attr("id");
-        let cityId = $(element).attr("class");
-        let cinemaLink = $(element).find("span").attr("onclick");
-        cinemaLink = cinemaLink.split("'")[1];
-        const cinemaDetails = await getCgvCinemaDetail(
-          cinemaLink,
-          cinemaName,
-          cinemaId,
-          cityId
-        );
-        cgvCinemas.push(cinemaDetails);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          let cinemaName = $(element).find("span").text();
+          let cinemaId = $(element).find("span").attr("id");
+          let cityId = $(element).attr("class");
+          let cinemaLink = $(element).find("span").attr("onclick");
+          cinemaLink = cinemaLink.split("'")[1];
+          const cinemaDetails = await getCgvCinemaDetail(
+            cinemaLink,
+            cinemaName,
+            cinemaId,
+            cityId
+          );
+          cgvCinemas.push(cinemaDetails);
+        } catch (error) {
+          console.log(error);
+        }
       });
       await Promise.all(promises.toArray());
     })

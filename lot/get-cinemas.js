@@ -40,16 +40,19 @@ async function getLotCinemas() {
 
         let cinemaPromises = cinemas.map(async (cinema) => {
           await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          let divisionCode = cinema.DivisionCode;
-          let detailDivisionCode = cinema.DetailDivisionCode;
-          let cinemaID = cinema.CinemaID;
-          let cinemaDetails = await getCinemaDetail(
-            divisionCode,
-            detailDivisionCode,
-            cinemaID
-          );
-          lotCinema.push(cinemaDetails);
+          try {
+            let divisionCode = cinema.DivisionCode;
+            let detailDivisionCode = cinema.DetailDivisionCode;
+            let cinemaID = cinema.CinemaID;
+            let cinemaDetails = await getCinemaDetail(
+              divisionCode,
+              detailDivisionCode,
+              cinemaID
+            );
+            lotCinema.push(cinemaDetails);
+          } catch (error) {
+            console.log(error);
+          }
         });
 
         return Promise.all(cinemaPromises);

@@ -19,6 +19,12 @@ const getLotteShowingMovies = require("./lot/get-showing");
 const getBhdShowingMovies = require("./bhd/get-showing");
 const getCgvShowing = require("./cgv/get-showing");
 const getGalShowingMovies = require("./gal/get-showing");
+const getGalShowtimes = require("./gal/get-showtimes");
+const { getCommingDate } = require("./getCommingDate");
+const bhdGetShowtimes = require("./bhd/get-showtimes");
+const getLotShowtimes = require("./lot/get-showtimes");
+const getCgvShowtimes = require("./cgv/get-showtimes");
+const getSession = require("./bhd/get-session");
 
 let browser;
 async function startPuppeteer() {
@@ -110,71 +116,87 @@ function insertCinemaCheck() {
 }
 
 function insertLotCinema() {
-  getLotCinemas().then((cinemas) => {
-    cinemas.forEach((cinema) => {
-      insertCinema(
-        cinema.cinema_id,
-        cinema.cinema_name,
-        cinema.cinemas_id,
-        cinema.city_id,
-        cinema.address,
-        cinema.latitude,
-        cinema.longitude
-      );
+  try {
+    getLotCinemas().then((cinemas) => {
+      cinemas.forEach((cinema) => {
+        insertCinema(
+          cinema.cinema_id,
+          cinema.cinema_name,
+          cinema.cinemas_id,
+          cinema.city_id,
+          cinema.address,
+          cinema.latitude,
+          cinema.longitude
+        );
+      });
+      console.log("Insert Lotte Cinema Done");
     });
-    console.log("Insert Lotte Cinema Done");
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function insertGalCinema() {
-  getGalCinemas().then((cinemas) => {
-    cinemas.forEach((cinema) => {
-      insertCinema(
-        cinema.cinema_id,
-        cinema.cinema_name,
-        cinema.cinemas_id,
-        cinema.city_id,
-        cinema.address,
-        cinema.latitude,
-        cinema.longitude
-      );
+  try {
+    getGalCinemas().then((cinemas) => {
+      cinemas.forEach((cinema) => {
+        insertCinema(
+          cinema.cinema_id,
+          cinema.cinema_name,
+          cinema.cinemas_id,
+          cinema.city_id,
+          cinema.address,
+          cinema.latitude,
+          cinema.longitude
+        );
+      });
+      console.log("Insert Galaxy Cinema Done");
     });
-    console.log("Insert Galaxy Cinema Done");
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function insertBhdCinema() {
-  getBhdCinemas().then((cinemas) => {
-    cinemas.forEach((cinema) => {
-      insertCinema(
-        cinema.cinema_id,
-        cinema.cinema_name,
-        cinema.cinemas_id,
-        cinema.city_id,
-        cinema.address,
-        cinema.latitude,
-        cinema.longitude
-      );
+  try {
+    getBhdCinemas().then((cinemas) => {
+      cinemas.forEach((cinema) => {
+        insertCinema(
+          cinema.cinema_id,
+          cinema.cinema_name,
+          cinema.cinemas_id,
+          cinema.city_id,
+          cinema.address,
+          cinema.latitude,
+          cinema.longitude
+        );
+      });
+      console.log("Insert BHD Cinema Done");
     });
-    console.log("Insert BHD Cinema Done");
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function insertCgvCinema() {
-  getCgvCinemas().then((cinemas) => {
-    cinemas.forEach((cinema) => {
-      insertCinema(
-        cinema.cinema_id,
-        cinema.cinema_name,
-        cinema.cinemas_id,
-        cinema.city_id,
-        cinema.address,
-        cinema.latitude,
-        cinema.longitude
-      );
+  try {
+    getCgvCinemas().then((cinemas) => {
+      cinemas.forEach((cinema) => {
+        insertCinema(
+          cinema.cinema_id,
+          cinema.cinema_name,
+          cinema.cinemas_id,
+          cinema.city_id,
+          cinema.address,
+          cinema.latitude,
+          cinema.longitude
+        );
+      });
+      console.log("Insert CGV Cinema Done");
     });
-    console.log("Insert CGV Cinema Done");
-  });
+  } catch (error) {
+    throw error;
+  }
 }
 
 function insertCinema(
@@ -393,7 +415,6 @@ function insertLocations() {
           id_cgv = "cgv_city_123";
           break;
       }
-      // lotte go vap, goldview division code 02
       insertLocation(location.name, location.id_gal, id_cgv, id_lot, id_bhd);
     });
     console.log("Insert Locations Done");
@@ -432,6 +453,7 @@ function createMovies() {
 }
 
 async function getMovies() {
+  console.log("Getting Movies");
   connection.query(
     "update wp_movies set is_showing = null",
     function (err, results, fields) {
@@ -464,188 +486,247 @@ async function getMovies() {
       });
     }
   );
-  /*
-  await getGalCommingMovies().then(async (galComming) => {
-    for (const movie of galComming) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!galMovieSet.has(movie)) {
-        let movieDetails = await getGalMovieDetails(movie);
-        movieDetails.is_showing = false;
-        insertMovie(movieDetails);
-      } else {
-        // update is_showing to false for the movie
-        connection.query(
-          "update wp_movies set is_showing = false where movie_id_gal = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
+  try {
+    await getGalCommingMovies().then(async (galComming) => {
+      for (const movie of galComming) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!galMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getGalMovieDetails(movie);
+            movieDetails.is_showing = false;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
           }
-        );
-      }
-    }
-  });
-
-  await delay(5000);
-  await getLotCommingMovies().then(async (lotComming) => {
-    for (const movie of lotComming) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!lotMovieSet.has(movie)) {
-        let movieDetails = await getLotMovieDetails(movie);
-        movieDetails.is_showing = false;
-        insertMovie(movieDetails);
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = false where movie_id_lot = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
-          }
-        );
-      }
-    }
-  });
-
-  await delay(5000);
-  await getBhdCommingMovies().then(async (bhdComming) => {
-    for (const movie of bhdComming) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!bhdMovieSet.has(movie)) {
-        let movieDetails = await getBhdMovieDetails(movie);
-        movieDetails.is_showing = false;
-        insertMovie(movieDetails);
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = false where movie_id_bhd = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
-          }
-        );
-      }
-    }
-  });
-*/
-  await delay(5000);
-  await getCgvComming(browser).then(async (cgvComming) => {
-    for (const movie of cgvComming) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!cgvMovieSet.has(movie)) {
-        if (movie.includes("_") && cgvMovieSet.has(movie.split("_")[0])) {
+        } else {
+          // update is_showing to false for the movie
           connection.query(
-            "update wp_movies set movie_id_cgv = ? where movie_id_cgv = ?",
-            [movie, movie.split("_")[0]],
+            "update wp_movies set is_showing = false where movie_id_gal = ?",
+            [movie],
             function (err, results, fields) {
               if (err) throw err;
             }
           );
-        } else {
-          let movieDetails = await getCgvMovieDetails(browser, movie);
-          movieDetails.is_showing = false;
-          insertMovie(movieDetails);
         }
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = false where movie_id_cgv = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
-          }
-        );
       }
-    }
-  });
-
-  await delay(5000);
-  await getLotteShowingMovies().then(async (lotteShowing) => {
-    for (const movie of lotteShowing) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!lotMovieSet.has(movie)) {
-        let movieDetails = await getLotMovieDetails(movie);
-        movieDetails.is_showing = true;
-        insertMovie(movieDetails);
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = true where movie_id_lot = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getLotCommingMovies().then(async (lotComming) => {
+      for (const movie of lotComming) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!lotMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getLotMovieDetails(movie);
+            movieDetails.is_showing = false;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
           }
-        );
-      }
-    }
-  });
-
-  await delay(5000);
-  await getBhdShowingMovies().then(async (bhdShowing) => {
-    for (const movie of bhdShowing) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!bhdMovieSet.has(movie)) {
-        let movieDetails = await getBhdMovieDetails(movie);
-        movieDetails.is_showing = true;
-        insertMovie(movieDetails);
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = true where movie_id_bhd = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
-          }
-        );
-      }
-    }
-  });
-
-  await delay(5000);
-  await getCgvShowing(browser).then(async (cgvShowing) => {
-    for (const movie of cgvShowing) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!cgvMovieSet.has(movie)) {
-        if (movie.includes("_") && cgvMovieSet.has(movie.split("_")[0])) {
+        } else {
           connection.query(
-            "update wp_movies set movie_id_cgv = ? where movie_id_cgv = ?",
-            [movie, movie.split("_")[0]],
+            "update wp_movies set is_showing = false where movie_id_lot = ?",
+            [movie],
             function (err, results, fields) {
               if (err) throw err;
             }
           );
-        } else {
-          let movieDetails = await getCgvMovieDetails(browser, movie);
-          movieDetails.is_showing = true;
-          insertMovie(movieDetails);
         }
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = true where movie_id_cgv = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
-          }
-        );
       }
-    }
-  });
-
-  await delay(5000);
-  await getGalShowingMovies().then(async (galShowing) => {
-    for (const movie of galShowing) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (!galMovieSet.has(movie)) {
-        let movieDetails = await getGalMovieDetails(movie);
-        movieDetails.is_showing = true;
-        insertMovie(movieDetails);
-      } else {
-        connection.query(
-          "update wp_movies set is_showing = true where movie_id_gal = ?",
-          [movie],
-          function (err, results, fields) {
-            if (err) throw err;
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getBhdCommingMovies().then(async (bhdComming) => {
+      for (const movie of bhdComming) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!bhdMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getBhdMovieDetails(movie);
+            movieDetails.is_showing = false;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
           }
-        );
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = false where movie_id_bhd = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
       }
-    }
-  });
-
-  await updateShowtimes();
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getCgvComming(browser).then(async (cgvComming) => {
+      for (const movie of cgvComming) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!cgvMovieSet.has(movie)) {
+          if (movie.includes("_") && cgvMovieSet.has(movie.split("_")[0])) {
+            connection.query(
+              "update wp_movies set movie_id_cgv = ? where movie_id_cgv = ?",
+              [movie, movie.split("_")[0]],
+              function (err, results, fields) {
+                if (err) throw err;
+              }
+            );
+          } else {
+            try {
+              let movieDetails = await getCgvMovieDetails(browser, movie);
+              movieDetails.is_showing = false;
+              insertMovie(movieDetails);
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = false where movie_id_cgv = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getLotteShowingMovies().then(async (lotteShowing) => {
+      for (const movie of lotteShowing) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!lotMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getLotMovieDetails(movie);
+            movieDetails.is_showing = true;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = true where movie_id_lot = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getBhdShowingMovies().then(async (bhdShowing) => {
+      for (const movie of bhdShowing) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!bhdMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getBhdMovieDetails(movie);
+            movieDetails.is_showing = true;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = true where movie_id_bhd = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getCgvShowing(browser).then(async (cgvShowing) => {
+      for (const movie of cgvShowing) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!cgvMovieSet.has(movie)) {
+          if (movie.includes("_") && cgvMovieSet.has(movie.split("_")[0])) {
+            connection.query(
+              "update wp_movies set movie_id_cgv = ? where movie_id_cgv = ?",
+              [movie, movie.split("_")[0]],
+              function (err, results, fields) {
+                if (err) throw err;
+              }
+            );
+          } else {
+            try {
+              let movieDetails = await getCgvMovieDetails(browser, movie);
+              movieDetails.is_showing = true;
+              insertMovie(movieDetails);
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = true where movie_id_cgv = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await delay(5000);
+    await getGalShowingMovies().then(async (galShowing) => {
+      for (const movie of galShowing) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (!galMovieSet.has(movie)) {
+          try {
+            let movieDetails = await getGalMovieDetails(movie);
+            movieDetails.is_showing = true;
+            insertMovie(movieDetails);
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          connection.query(
+            "update wp_movies set is_showing = true where movie_id_gal = ?",
+            [movie],
+            function (err, results, fields) {
+              if (err) throw err;
+            }
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  try {
+    await updateShowtimes();
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function insertMovie(movieDetails) {
@@ -675,7 +756,7 @@ function insertMovie(movieDetails) {
 
 function createShowtimes() {
   connection.query(
-    "create table if not exists wp_showtimes (id int(11) NOT NULL AUTO_INCREMENT, movie_id varchar(255), cinema_id varchar(255), date varchar(20), start_time varchar(20), movie_format varchar(255), PRIMARY KEY (id))",
+    "create table if not exists wp_showtimes (id int(11) NOT NULL AUTO_INCREMENT,cinemas_id varchar(255), movie_id varchar(255), cinema_id varchar(255), date varchar(20), start_time varchar(20), movie_format varchar(255), PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) throw err;
     }
@@ -684,23 +765,111 @@ function createShowtimes() {
 
 async function updateShowtimes() {
   // remove all old showtimes
+  console.log("Updating Showtimes");
   connection.query("delete from wp_showtimes", function (err, results, fields) {
     if (err) throw err;
     console.log("Deleted old showtimes");
   });
+
+  await getGalShowtimes().then(async (showtimes) => {
+    console.log("Inserting Galaxy Showtimes");
+    for (const showtime of showtimes) {
+      await delay(200);
+      insertShowtimes(showtime);
+    }
+  });
+
+  connection.query(
+    "select movie_id_bhd, movie_id_cgv from wp_movies where movie_id_bhd is not null or movie_id_cgv is not null",
+    async function (err, results, fields) {
+      if (err) throw err;
+      for (const movie of results) {
+        if (movie.movie_id_bhd) {
+          let session = "";
+          try {
+            session = await getSession(movie.movie_id_bhd);
+            console.log("New session completed: " + session);
+          } catch (error) {}
+          for (const date of getCommingDate(7)) {
+            date = "" + date;
+            await delay(1000);
+            try {
+              await bhdGetShowtimes(movie.movie_id_bhd, date, session).then(
+                async (showtimes) => {
+                  for (const showtime of showtimes) {
+                    await delay(200);
+                    insertShowtimes(showtime);
+                  }
+                }
+              );
+            } catch (error) {}
+          }
+        }
+        if (movie.movie_id_cgv) {
+          for (const date of getCommingDate(7)) {
+            date = "" + date;
+            await delay(1000);
+            try {
+              await getCgvShowtimes(movie.movie_id_cgv, date).then(
+                async (showtimes) => {
+                  for (const showtime of showtimes) {
+                    await delay(200);
+                    insertShowtimes(showtime);
+                  }
+                }
+              );
+            } catch (error) {}
+          }
+        }
+      }
+    }
+  );
+
+  connection.query(
+    "select cinema_id from wp_cinema where cinemas_id = 'LOT'",
+    async function (err, results, fields) {
+      if (err) throw err;
+      for (const result of results) {
+        try {
+          for (const date of getCommingDate(7)) {
+            await delay(500);
+            getLotShowtimes(result.cinema_id, date).then(async (showtimes) => {
+              await delay(200);
+              for (const showtime of showtimes) {
+                await delay(200);
+                insertShowtimes(showtime);
+                console.log(showtime);
+              }
+            });
+          }
+        } catch (error) {}
+      }
+    }
+  );
+
+  console.log("Updated Showtimes");
 }
 
-// createLocations();
-
-// createCinemas();
-// createCinema();
-
-// insertGalCinema();
-
-/*
+function insertShowtimes(showtimes) {
+  connection.query(
+    "insert into wp_showtimes(cinemas_id, movie_id, cinema_id, date, start_time, movie_format) values(?, ?, ?, ?, ?, ?)",
+    [
+      showtimes.cinemas_id,
+      showtimes.movie_id,
+      showtimes.cinema_id,
+      showtimes.date,
+      showtimes.start_time,
+      showtimes.movie_format,
+    ],
+    function (err, results, fields) {
+      if (err) throw err;
+    }
+  );
+}
 
 startPuppeteer().then(() => {
   async function run() {
+    createShowtimes();
     await delay(5000);
     createCinemas();
     await delay(5000);
@@ -710,15 +879,9 @@ startPuppeteer().then(() => {
     await delay(5000);
     createMovies();
     await delay(5000);
-    getMovies();
+    await getMovies();
     await delay(5000);
   }
   run();
 });
 cron.schedule("0 0 * * *", getMovies);
-
-*/
-startPuppeteer();
-createMovies();
-createShowtimes();
-getMovies();

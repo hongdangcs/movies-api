@@ -48,6 +48,7 @@ async function getLotShowtimes(cinemaId, date) {
         });
 
         showtimes.push({
+          cinemas_id: "LOT",
           movie_id: movieId,
           cinema_id: cinemaId,
           date: date,

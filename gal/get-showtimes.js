@@ -26,6 +26,7 @@ async function getGalShowtimes() {
             let time = showtime.showTime;
             let format = showtime.movieFormat;
             showtimes.push({
+              cinemas_id: "GAL",
               movie_id: movieId,
               cinema_id: cinemaId,
               date: date,
@@ -47,6 +48,4 @@ async function getGalShowtimes() {
   return showtimes;
 }
 
-getGalShowtimes().then((showtimes) => {
-  console.log(showtimes);
-});
+module.exports = getGalShowtimes;
