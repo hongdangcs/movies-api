@@ -4,7 +4,7 @@ const cheerio = require("cheerio");
 let config = {
   method: "get",
   maxBodyLength: Infinity,
-  url: "https://www.bhdstar.vn/he-thong-rap/",
+  url: "https://www.bhdstar.vn/lich-chieu/",
 };
 async function getBhdCinemas() {
   let bhdCinemas = [];
@@ -13,13 +13,36 @@ async function getBhdCinemas() {
     .request(config)
     .then(async (response) => {
       const $ = cheerio.load(response.data);
-      const cinemas = $(".post-item");
-
+      const cinemas = $("ul.bhd-lich-chieu-chon-rap li.cinemas");
+      for (const cinema of cinemas) {
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          let cinemaName = $(cinema).find("a.inside h4.title").text();
+          let address = $(cinema).find("a.inside p").text();
+          let cinemaId = $(cinema).find("a.inside").attr("data-id");
+          let cityId = $(cinema).attr("class");
+          cityId = cityId.split("category-city-")[1];
+          let cinemas_id = "BHD";
+          bhdCinemas.push({
+            cinema_id: cinemaId,
+            cinema_name: cinemaName,
+            cinemas_id: cinemas_id,
+            city_id: cityId,
+            address: address,
+            latitude: "",
+            longitude: "",
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      /*
       const promises = cinemas.map(async (index, element) => {
         try {
           await new Promise((resolve) => setTimeout(resolve, 3000));
           const cinema = $(element);
           const cinemaLink = cinema.find("a").attr("href");
+          console.log(cinemaLink);
           const cinemaDetails = await getBhdCinemaDetails(cinemaLink);
           bhdCinemas.push(cinemaDetails);
         } catch (error) {
@@ -28,6 +51,7 @@ async function getBhdCinemas() {
       });
 
       await Promise.all(promises.toArray());
+      */
     })
     .catch((error) => {
       console.log(error);

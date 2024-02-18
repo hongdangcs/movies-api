@@ -10,6 +10,7 @@ async function getSession(movieId) {
     url: "https://www.bhdstar.vn/dat-ve/?f=" + id + "#/",
   };
   try {
+    console.log(config.url);
     await axios
       .request(config)
       .then((response) => {
@@ -28,3 +29,7 @@ async function getSession(movieId) {
 }
 
 module.exports = getSession;
+
+getSession("103959_slyth-the-hunt-saga").then((res) => {
+  console.log(res);
+});

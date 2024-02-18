@@ -6,7 +6,7 @@ async function getGalMovieDetails(movieId) {
     method: "get",
     maxBodyLength: Infinity,
     url:
-      "https://www.galaxycine.vn/_next/data/zj9M_0M0VUwh8H5fBvv5V/vi/dat-ve/" +
+      "https://www.galaxycine.vn/_next/data/UuAh2GDJrFZlGK8gqdlFG/vi/dat-ve/" +
       movieId +
       ".json",
   };

@@ -12,16 +12,13 @@ async function getBhdCommingMovies() {
     .request(config)
     .then((response) => {
       const $ = cheerio.load(response.data);
-      let lists = $(".row .col.small-12.large-12 .film-slider");
-      let comming = lists[lists.length - 1];
-      let commingMovies = $(comming).find(".col.film-col-item");
-      commingMovies.each((index, element) => {
-        let movie = $(element);
-        let movieId = movie.find("a").attr("data-id");
-        let movieSlug = movie.find("a").attr("data-url");
-        movieSlug = movieSlug.split("/")[4].split("/")[0];
-        commingMoviesReturn.push(movieId + "_" + movieSlug);
-      });
+      let lists = $(
+        ".container-search-header.container-search-header-soon ul li a"
+      );
+      for (const list of lists) {
+        let id = $(list).attr("data-id");
+        commingMoviesReturn.push(id);
+      }
     })
     .catch((error) => {
       console.log(error);
