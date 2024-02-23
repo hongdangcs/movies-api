@@ -1,6 +1,6 @@
 const axios = require("axios");
 async function getBuildId() {
-  buildId = "";
+  let buildId = "";
   let config = {
     method: "get",
     maxBodyLength: Infinity,

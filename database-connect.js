@@ -23,7 +23,6 @@ const { getCommingDate } = require("./getCommingDate");
 const bhdGetShowtimes = require("./bhd/get-showtimes");
 const getLotShowtimes = require("./lot/get-showtimes");
 const getCgvShowtimes = require("./cgv/get-showtimes");
-const e = require("express");
 const getCgvCinema = require("./cgv/get-cinemas");
 const getSession = require("./bhd/get-session");
 
@@ -97,15 +96,15 @@ function insertCinemas(cinemas_id, cinemas_name, cinemas_link, icon_link) {
 async function createCinema() {
   connection.query(
     "Create table if not exists wp_cinema (id int(11) NOT NULL AUTO_INCREMENT, cinema_id varchar(255) NOT NULL, cinema_name varchar(255) NOT NULL, cinemas_id varchar(255) NOT NULL, city_id varchar(255) NOT NULL, address text NOT NULL, latitude varchar(255), longitude varchar(255), PRIMARY KEY (id))",
-    async function (err, results, fields) {
+    function (err, results, fields) {
       if (err) throw err;
-      await insertCinemaCheck();
     }
   );
+  await insertCinemaCheck();
 }
-
-async function insertCinemaCheck() {
-  connection.query(
+/*
+ function insertCinemaCheck() {
+   connection.query(
     "select * from wp_cinema",
     async function (err, results, fields) {
       if (err) throw err;
@@ -118,7 +117,30 @@ async function insertCinemaCheck() {
     }
   );
 }
-
+*/
+async function insertCinemaCheck() {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "select * from wp_cinema",
+      async function (err, results, fields) {
+        if (err) reject(err);
+        if (results.length == 0) {
+          try {
+            await insertLotCinema();
+            await insertGalCinema();
+            await insertBhdCinema();
+            await insertCgvCinema();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          resolve();
+        }
+      }
+    );
+  });
+}
 async function insertLotCinema() {
   try {
     await getLotCinemas().then((cinemas) => {
@@ -246,9 +268,9 @@ function insertLocationsCheck() {
 function insertLocations() {
   getLocations().then((locations) => {
     locations.forEach((location) => {
-      id_cgv = "";
-      id_lot = "";
-      id_bhd = "";
+      let id_cgv = "";
+      let id_lot = "";
+      let id_bhd = "";
       switch (location.id_gal) {
         case "599535ea-1ea2-4393-9b5a-3ba3a807f363":
           id_cgv = "cgv_city_1";
@@ -467,10 +489,10 @@ async function getMovies() {
     }
   );
 
-  galMovieSet = new Set();
-  lotMovieSet = new Set();
-  bhdMovieSet = new Set();
-  cgvMovieSet = new Set();
+  let galMovieSet = new Set();
+  let lotMovieSet = new Set();
+  let bhdMovieSet = new Set();
+  let cgvMovieSet = new Set();
 
   connection.query(
     "select movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv from wp_movies",
@@ -713,7 +735,7 @@ async function getMovies() {
           try {
             let movieDetails = await getGalMovieDetails(movie);
             if (movieDetails.movie_name) {
-              movieDetails.is_showing = false;
+              movieDetails.is_showing = true;
               insertMovie(movieDetails);
             } else {
               console.log("ERROR: " + movie + " Details not found");
@@ -804,13 +826,13 @@ async function updateShowtimes() {
         await delay(3000);
 
         if (movie.movie_id_bhd) {
-          if (session == "" || session == null || session == undefined) {
+          if (session == "" || session == null ) {
             try {
               session = await getSession(movie.movie_id_bhd);
               console.log("New session completed: " + session);
             } catch (error) {}
           }
-          for (const date of getCommingDate(7)) {
+          for (let date of getCommingDate(7)) {
             date = "" + date;
             await delay(1000);
             try {
@@ -890,7 +912,7 @@ function insertShowtimes(showtimes) {
 }
 
 cron.schedule("0 4 * * *", getMovies);
-startPuppeteer().then(() => {
+startPuppeteer().then(async () => {
   async function run() {
     createShowtimes();
     createCinemas();
@@ -904,5 +926,5 @@ startPuppeteer().then(() => {
     await getMovies();
     await delay(5000);
   }
-  run();
+  await run();
 });
