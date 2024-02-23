@@ -15,7 +15,9 @@ async function getBhdMovieDetails(movieId) {
     .then((response) => {
       let $ = cheerio.load(response.data);
       let movieName = $(".product--name h3").text();
-      let movieImage = $(".col-thubnail-bhd a img.movie-full").attr("src");
+      let movieImage = $(".col-thubnail-bhd a img.movie-full")
+        .attr("src")
+        .split("?refer")[0];
       let descreption = $(".film--detail").text();
       let movieMetas = $(".product--view .film--info li");
       let director = "";
@@ -63,7 +65,3 @@ async function getBhdMovieDetails(movieId) {
 }
 
 module.exports = getBhdMovieDetails;
-
-getBhdMovieDetails("HO00002871").then((res) => {
-  console.log(res);
-});

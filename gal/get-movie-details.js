@@ -1,12 +1,18 @@
 const axios = require("axios");
+const cheerio = require("cheerio");
+const getBuildId = require("./get-buildId");
 
 async function getGalMovieDetails(movieId) {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  let buildId = await getBuildId();
+  await new Promise((resolve) => setTimeout(resolve, 1500));
   let config = {
     method: "get",
     maxBodyLength: Infinity,
     url:
-      "https://www.galaxycine.vn/_next/data/UuAh2GDJrFZlGK8gqdlFG/vi/dat-ve/" +
+      "https://www.galaxycine.vn/_next/data/" +
+      buildId +
+      "/vi/dat-ve/" +
       movieId +
       ".json",
   };
@@ -21,11 +27,14 @@ async function getGalMovieDetails(movieId) {
       let actorsString = actors.join(", ");
       let genres = movie.categories.map((categories) => categories.name);
       let genresString = genres.join(", ");
+
+      let description = cheerio.load(movie.description);
+      description = description.text();
       movieDetails = {
         movie_id_gal: movieId,
         movie_name: movie.name,
         poster: movie.imageLandscape,
-        description: movie.description,
+        description: description,
         director: directorsString,
         cast: actorsString,
         running_time: movie.duration,

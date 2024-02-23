@@ -28,7 +28,3 @@ async function getBhdShowingMovies() {
 }
 
 module.exports = getBhdShowingMovies;
-
-getBhdShowingMovies().then((res) => {
-  console.log(res);
-});

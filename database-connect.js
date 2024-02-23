@@ -24,7 +24,7 @@ const { getCommingDate } = require("./getCommingDate");
 const bhdGetShowtimes = require("./bhd/get-showtimes");
 const getLotShowtimes = require("./lot/get-showtimes");
 const getCgvShowtimes = require("./cgv/get-showtimes");
-const getSession = require("./bhd/get-session");
+const e = require("express");
 
 let browser;
 async function startPuppeteer() {
@@ -493,8 +493,12 @@ async function getMovies() {
         if (!galMovieSet.has(movie)) {
           try {
             let movieDetails = await getGalMovieDetails(movie);
-            movieDetails.is_showing = false;
-            insertMovie(movieDetails);
+            if (movieDetails.movie_name) {
+              movieDetails.is_showing = false;
+              insertMovie(movieDetails);
+            } else {
+              console.log("ERROR: " + movie + " Details not found");
+            }
           } catch (error) {
             console.log(error);
           }
@@ -698,12 +702,16 @@ async function getMovies() {
     await delay(5000);
     await getGalShowingMovies().then(async (galShowing) => {
       for (const movie of galShowing) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await delay(2500);
         if (!galMovieSet.has(movie)) {
           try {
             let movieDetails = await getGalMovieDetails(movie);
-            movieDetails.is_showing = true;
-            insertMovie(movieDetails);
+            if (movieDetails.movie_name) {
+              movieDetails.is_showing = false;
+              insertMovie(movieDetails);
+            } else {
+              console.log("ERROR: " + movie + " Details not found");
+            }
           } catch (error) {
             console.log(error);
           }
@@ -780,33 +788,26 @@ async function updateShowtimes() {
   });
 
   connection.query(
-    "select movie_id_bhd, movie_id_cgv from wp_movies where movie_id_bhd is not null or movie_id_cgv is not null",
+    "select movie_id_bhd, movie_id_cgv from wp_movies where (movie_id_bhd is not null or movie_id_cgv is not null) AND is_showing is not null",
     async function (err, results, fields) {
       if (err) throw err;
-      let session = "";
-      let firstBhd = results[0].movie_id_bhd;
-      try {
-        session = await getSession(firstBhd);
-      } catch (error) {}
+
       await delay(3000);
       for (const movie of results) {
         await delay(3000);
         if (movie.movie_id_bhd) {
-          for (let date of getCommingDate(7)) {
-            date = "" + date;
-            await delay(5000);
-            try {
-              await bhdGetShowtimes(movie.movie_id_bhd, date, session).then(
-                async (showtimes) => {
-                  await delay(1500);
-                  for (const showtime of showtimes) {
-                    await delay(100);
-                    insertShowtimes(showtime);
-                  }
+          await delay(5000);
+          try {
+            await bhdGetShowtimes(movie.movie_id_bhd).then(
+              async (showtimes) => {
+                await delay(1500);
+                for (const showtime of showtimes) {
+                  await delay(100);
+                  insertShowtimes(showtime);
                 }
-              );
-            } catch (error) {}
-          }
+              }
+            );
+          } catch (error) {}
         }
         if (movie.movie_id_cgv) {
           for (let date of getCommingDate(7)) {

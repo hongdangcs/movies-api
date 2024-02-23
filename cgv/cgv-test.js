@@ -3,10 +3,10 @@ const getCgvShowing = require("./get-showing");
 const { getCgvComming } = require("./get-comming");
 let browser;
 async function startPuppeteer() {
-  browser = await puppeteer.launch({ headless: "new" });
+  browser = await puppeteer.launch({ headless: false });
 }
 startPuppeteer().then(async () => {
-  getCgvComming(browser).then((result) => {
+  getCgvShowing(browser).then((result) => {
     console.log(result);
   });
 });

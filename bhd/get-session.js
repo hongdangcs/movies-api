@@ -29,7 +29,3 @@ async function getSession(movieId) {
 }
 
 module.exports = getSession;
-
-getSession("103959_slyth-the-hunt-saga").then((res) => {
-  console.log(res);
-});
