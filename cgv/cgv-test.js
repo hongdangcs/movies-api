@@ -1,12 +1,13 @@
 const puppeteer = require("puppeteer");
 const getCgvShowing = require("./get-showing");
 const { getCgvComming } = require("./get-comming");
+const getCgvCinema = require("./get-cinemas");
 let browser;
 async function startPuppeteer() {
   browser = await puppeteer.launch({ headless: false });
 }
 startPuppeteer().then(async () => {
-  getCgvShowing(browser).then((result) => {
+  getCgvComming(browser).then((result) => {
     console.log(result);
   });
 });

@@ -1,7 +1,7 @@
 async function getCgvComming(browser) {
   const page = await browser.newPage();
   await page.goto("https://www.cgv.vn/default/movies/coming-soon-1.html");
-  await page.waitForNavigation({ waitUntil: "networkidle0" });
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   // const movies = await page.$$(
   //   ".category-products.cgv-movies .film-lists.item.last"
   // );

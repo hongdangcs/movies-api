@@ -1,6 +1,6 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-
+/*
 async function getCgvCinemas() {
   let cgvCinemas = [];
   let config = {
@@ -82,5 +82,58 @@ async function getCgvCinemaDetail(cinemaLink, cinemaName, cinemaId, cityId) {
 
   return cinemaDetails;
 }
+*/
+async function getCgvCinema(browser) {
+  let cgvCinemas = [];
+  let page = await browser.newPage();
+  await page.goto("https://www.cgv.vn/default/cinox/site/");
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  let cinemaList = await page.$$(".cinemas-list ul li");
+  for (const cinema of cinemaList) {
+    let cinemaName = await cinema.$eval("span", (span) => span.textContent);
+    let cinemaId = await cinema.$eval("span", (span) => span.id);
+    cinemaId = cinemaId.split("_")[2];
+    let cityId = await cinema.evaluate((li) => li.className);
+    let cinemaLink = await cinema.$eval("span", (span) =>
+      span.getAttribute("onclick")
+    );
+    let latitude = "";
+    let longitude = "";
+    cinemaLink = cinemaLink.split("'")[1];
+    let addressPage = await browser.newPage();
+    await addressPage.goto(cinemaLink);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    let cinemaAddress = await addressPage.$(
+      ".theater-infomation .theater-address"
+    );
+    let cinemaAddressText = await cinemaAddress.evaluate(
+      (el) => el.textContent
+    );
+    try {
+      let mapLink = await addressPage.$(
+        ".theater-infomation .location a.iframe.cboxElement"
+      );
+      let mapLinkText = await mapLink.evaluate((el) => el.getAttribute("href"));
+      let mapLinkTextSplit = mapLinkText.split("!2d")[1];
+      longitude = mapLinkTextSplit.split("!3d")[0];
+      latitude = mapLinkTextSplit.split("!3d")[1].split("!")[0];
+    } catch (error) {
+      console.log("error getting lat long: ", cinemaName);
+    }
+    let cinemaDetails = {
+      cinema_id: cinemaId,
+      cinema_name: cinemaName,
+      cinemas_id: "CGV",
+      city_id: cityId,
+      address: cinemaAddressText,
+      latitude: latitude,
+      longitude: longitude,
+    };
+    cgvCinemas.push(cinemaDetails);
+    await addressPage.close();
+  }
+  await page.close();
+  return cgvCinemas;
+}
 
-module.exports = getCgvCinemas;
+module.exports = getCgvCinema;

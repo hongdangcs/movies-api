@@ -2,7 +2,7 @@ const axios = require("axios");
 const { convertDateFormat } = require("../getCommingDate");
 const cheerio = require("cheerio");
 const qs = require("qs");
-/*
+
 async function bhdGetShowtimes(movieId, date, session) {
   let showtimes = [];
   let id = movieId.split("_")[0];
@@ -10,7 +10,7 @@ async function bhdGetShowtimes(movieId, date, session) {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `https://www.bhdstar.vn/wp-admin/admin-ajax.php?action=ldapp_order_get_schedule&orderDate=${convertDateFormat(
+    url: `https://bhdstar.vn/wp-admin/admin-ajax.php?action=ldapp_order_get_schedule&orderDate=${convertDateFormat(
       date
     )}&f=${id}&nonce=${session}`,
   };
@@ -41,7 +41,9 @@ async function bhdGetShowtimes(movieId, date, session) {
   }
   return showtimes;
 }
-*/
+module.exports = bhdGetShowtimes;
+
+/*
 async function bhdGetShowtimes(movieId) {
   let showtimes = [];
   let data = qs.stringify({
@@ -101,3 +103,4 @@ async function bhdGetShowtimes(movieId) {
 }
 
 module.exports = bhdGetShowtimes;
+*/

@@ -5,7 +5,6 @@ const getLotCinemas = require("./lot/get-cinemas");
 const getGalCinemas = require("./gal/get-cinemas");
 const { getLocations } = require("./gal/get-location");
 const getBhdCinemas = require("./bhd/get-cinemas");
-const getCgvCinemas = require("./cgv/get-cinemas");
 const server_configs = require("./config");
 const getGalCommingMovies = require("./gal/get-comming");
 const getGalMovieDetails = require("./gal/get-movie-details");
@@ -25,6 +24,8 @@ const bhdGetShowtimes = require("./bhd/get-showtimes");
 const getLotShowtimes = require("./lot/get-showtimes");
 const getCgvShowtimes = require("./cgv/get-showtimes");
 const e = require("express");
+const getCgvCinema = require("./cgv/get-cinemas");
+const getSession = require("./bhd/get-session");
 
 let browser;
 async function startPuppeteer() {
@@ -93,31 +94,34 @@ function insertCinemas(cinemas_id, cinemas_name, cinemas_link, icon_link) {
   );
 }
 
-function createCinema() {
+async function createCinema() {
   connection.query(
     "Create table if not exists wp_cinema (id int(11) NOT NULL AUTO_INCREMENT, cinema_id varchar(255) NOT NULL, cinema_name varchar(255) NOT NULL, cinemas_id varchar(255) NOT NULL, city_id varchar(255) NOT NULL, address text NOT NULL, latitude varchar(255), longitude varchar(255), PRIMARY KEY (id))",
-    function (err, results, fields) {
+    async function (err, results, fields) {
       if (err) throw err;
-      insertCinemaCheck();
+      await insertCinemaCheck();
     }
   );
 }
 
-function insertCinemaCheck() {
-  connection.query("select * from wp_cinema", function (err, results, fields) {
-    if (err) throw err;
-    if (results.length == 0) {
-      insertLotCinema();
-      insertGalCinema();
-      insertBhdCinema();
-      insertCgvCinema();
+async function insertCinemaCheck() {
+  connection.query(
+    "select * from wp_cinema",
+    async function (err, results, fields) {
+      if (err) throw err;
+      if (results.length == 0) {
+        await insertLotCinema();
+        await insertGalCinema();
+        await insertBhdCinema();
+        await insertCgvCinema();
+      }
     }
-  });
+  );
 }
 
-function insertLotCinema() {
+async function insertLotCinema() {
   try {
-    getLotCinemas().then((cinemas) => {
+    await getLotCinemas().then((cinemas) => {
       cinemas.forEach((cinema) => {
         insertCinema(
           cinema.cinema_id,
@@ -136,9 +140,9 @@ function insertLotCinema() {
   }
 }
 
-function insertGalCinema() {
+async function insertGalCinema() {
   try {
-    getGalCinemas().then((cinemas) => {
+    await getGalCinemas().then((cinemas) => {
       cinemas.forEach((cinema) => {
         insertCinema(
           cinema.cinema_id,
@@ -157,9 +161,9 @@ function insertGalCinema() {
   }
 }
 
-function insertBhdCinema() {
+async function insertBhdCinema() {
   try {
-    getBhdCinemas().then((cinemas) => {
+    await getBhdCinemas().then((cinemas) => {
       cinemas.forEach((cinema) => {
         insertCinema(
           cinema.cinema_id,
@@ -178,9 +182,9 @@ function insertBhdCinema() {
   }
 }
 
-function insertCgvCinema() {
+async function insertCgvCinema() {
   try {
-    getCgvCinemas().then((cinemas) => {
+    await getCgvCinema(browser).then((cinemas) => {
       cinemas.forEach((cinema) => {
         insertCinema(
           cinema.cinema_id,
@@ -253,7 +257,8 @@ function insertLocations() {
           break;
         case "f4bf5f53-4e80-40c8-b1e0-f11ffa9a636a":
           id_lot = "Hanoi";
-          id_bhd = "tp-ha-noi";
+          // id_bhd = "tp-ha-noi";
+          id_bhd = "ha-noi";
           id_cgv = "cgv_city_3";
           break;
         case "48def6c3-5254-4ece-b63c-e5524fda1296":
@@ -261,7 +266,8 @@ function insertLocations() {
           id_cgv = "cgv_city_5";
           break;
         case "c6a74ae6-4f2a-4ad7-8e9e-ba22f05c11a9":
-          id_bhd = "tp-long-khanh";
+          // id_bhd = "tp-long-khanh";
+          id_bhd = "dong-nai";
           id_lot = "Dong Nai Province";
           id_cgv = "cgv_city_9";
           break;
@@ -793,21 +799,31 @@ async function updateShowtimes() {
       if (err) throw err;
 
       await delay(3000);
+      let session = "";
       for (const movie of results) {
         await delay(3000);
+
         if (movie.movie_id_bhd) {
-          await delay(5000);
-          try {
-            await bhdGetShowtimes(movie.movie_id_bhd).then(
-              async (showtimes) => {
-                await delay(1500);
-                for (const showtime of showtimes) {
-                  await delay(100);
-                  insertShowtimes(showtime);
+          if (session == "" || session == null || session == undefined) {
+            try {
+              session = await getSession(movie.movie_id_bhd);
+              console.log("New session completed: " + session);
+            } catch (error) {}
+          }
+          for (const date of getCommingDate(7)) {
+            date = "" + date;
+            await delay(1000);
+            try {
+              await bhdGetShowtimes(movie.movie_id_bhd, date, session).then(
+                async (showtimes) => {
+                  for (const showtime of showtimes) {
+                    await delay(200);
+                    insertShowtimes(showtime);
+                  }
                 }
-              }
-            );
-          } catch (error) {}
+              );
+            } catch (error) {}
+          }
         }
         if (movie.movie_id_cgv) {
           for (let date of getCommingDate(7)) {
@@ -873,13 +889,13 @@ function insertShowtimes(showtimes) {
   );
 }
 
-cron.schedule("0 0 * * *", getMovies);
+cron.schedule("0 4 * * *", getMovies);
 startPuppeteer().then(() => {
   async function run() {
     createShowtimes();
     createCinemas();
     await delay(5000);
-    createCinema();
+    await createCinema();
     await delay(5000);
     createLocations();
     await delay(5000);

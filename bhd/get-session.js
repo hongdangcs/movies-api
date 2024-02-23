@@ -7,7 +7,7 @@ async function getSession(movieId) {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: "https://www.bhdstar.vn/dat-ve/?f=" + id + "#/",
+    url: "https://bhdstar.vn/dat-ve/?f=" + id + "#/",
   };
   try {
     console.log(config.url);
