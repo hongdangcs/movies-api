@@ -10,7 +10,6 @@ async function getSession(movieId) {
     url: "https://bhdstar.vn/dat-ve/?f=" + id + "#/",
   };
   try {
-    console.log(config.url);
     await axios
       .request(config)
       .then((response) => {

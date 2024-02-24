@@ -26,17 +26,13 @@ async function getCgvMovieDetails(browser, movieId) {
         ".product-view .product-shop .product-name .h1",
         (el) => el.textContent
       );
-    } catch (error) {
-      console.log("movieName not found" + movieId);
-    }
+    } catch (error) {}
     try {
       movieImage = await page.$eval(
         ".product-view .product-img-box #image-main",
         (el) => el.src
       );
-    } catch (error) {
-      console.log("movieImage not found" + movieId);
-    }
+    } catch (error) {}
     try {
       let descreption = await page.$$(
         ".product-view .product-collateral .tab-content"
@@ -46,60 +42,44 @@ async function getCgvMovieDetails(browser, movieId) {
           ".std",
           (el) => el.textContent
         );
-      } catch (error) {
-        console.log("descreptionText not found" + movieId);
-      }
+      } catch (error) {}
       try {
         trailer = await descreption[1].$eval(
           ".product_view_trailer iframe",
           (el) => el.src
         );
-      } catch (error) {
-        console.log("trailer not found" + movieId);
-      }
-    } catch (error) {
-      console.log("Element not found" + movieId);
-    }
+      } catch (error) {}
+    } catch (error) {}
     try {
       director = await page.$eval(
         ".movie-director.movie-info .std",
         (el) => el.textContent
       );
-    } catch (error) {
-      console.log("director not found" + movieId);
-    }
+    } catch (error) {}
     try {
       let movieActress = await page.$$(".movie-actress.movie-info");
 
       try {
         cast = await movieActress[0].$eval(".std", (el) => el.textContent);
-      } catch (error) {
-        console.log("cast not found" + movieId);
-      }
+      } catch (error) {}
       try {
         duration = await movieActress[1].$eval(".std", (el) => el.textContent);
       } catch (error) {
         console.log("duration not found" + movieId);
       }
-    } catch (error) {
-      console.log("movieActress not found" + movieId);
-    }
+    } catch (error) {}
     try {
       genre = await page.$eval(
         ".movie-genre.movie-info .std",
         (el) => el.textContent
       );
-    } catch (error) {
-      console.log("genre not found" + movieId);
-    }
+    } catch (error) {}
     try {
       age = await page.$eval(
         ".movie-rating.movie-rated-web .std",
         (el) => el.textContent
       );
-    } catch (error) {
-      console.log("age not found" + movieId);
-    }
+    } catch (error) {}
 
     movieDetails = {
       movie_id_cgv: movieId,
