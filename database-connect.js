@@ -525,6 +525,10 @@ async function getMovies() {
   let lotMovieSet = new Set();
   let bhdMovieSet = new Set();
   let cgvMovieSet = new Set();
+  let galMovie = [];
+  let lotMovie = [];
+  let bhdMovie = [];
+  let cgvMovie = [];
 
   connection.query(
     "select movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv from wp_movies",
@@ -548,6 +552,7 @@ async function getMovies() {
   );
   try {
     await getGalCommingMovies().then(async (galComming) => {
+      galMovie.push(...galComming);
       for (const movie of galComming) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         if (!galMovieSet.has(movie)) {
@@ -581,6 +586,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getLotCommingMovies().then(async (lotComming) => {
+      lotMovie.push(...lotComming);
       for (const movie of lotComming) {
         await delay(1500);
         if (!lotMovieSet.has(movie)) {
@@ -610,6 +616,8 @@ async function getMovies() {
   try {
     await delay(5000);
     await getBhdCommingMovies().then(async (bhdComming) => {
+      bhdMovie.push(...bhdComming);
+
       for (const movie of bhdComming) {
         await delay(1500);
         if (!bhdMovieSet.has(movie)) {
@@ -639,6 +647,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getCgvComming(browser).then(async (cgvComming) => {
+      cgvMovie.push(...cgvComming);
       for (const movie of cgvComming) {
         await delay(1500);
         if (!cgvMovieSet.has(movie)) {
@@ -678,6 +687,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getLotteShowingMovies().then(async (lotteShowing) => {
+      lotMovie.push(...lotteShowing);
       for (const movie of lotteShowing) {
         await delay(1500);
         if (!lotMovieSet.has(movie)) {
@@ -707,6 +717,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getBhdShowingMovies().then(async (bhdShowing) => {
+      bhdMovie.push(...bhdShowing);
       for (const movie of bhdShowing) {
         await delay(1500);
         if (!bhdMovieSet.has(movie)) {
@@ -736,6 +747,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getCgvShowing(browser).then(async (cgvShowing) => {
+      cgvMovie.push(...cgvShowing);
       for (const movie of cgvShowing) {
         await delay(1500);
         if (!cgvMovieSet.has(movie)) {
@@ -775,6 +787,7 @@ async function getMovies() {
   try {
     await delay(5000);
     await getGalShowingMovies().then(async (galShowing) => {
+      galMovie.push(...galShowing);
       for (const movie of galShowing) {
         await delay(2500);
         if (!galMovieSet.has(movie)) {
@@ -811,20 +824,25 @@ async function getMovies() {
   //   console.log(error);
   // }
   // remove duplicate movies in each set
-  galMovieSet = [...new Set(galMovieSet)];
-  lotMovieSet = [...new Set(lotMovieSet)];
-  bhdMovieSet = [...new Set(bhdMovieSet)];
-  cgvMovieSet = [...new Set(cgvMovieSet)];
+  // galMovieSet = [...new Set(galMovieSet)];
+  // lotMovieSet = [...new Set(lotMovieSet)];
+  // bhdMovieSet = [...new Set(bhdMovieSet)];
+  // cgvMovieSet = [...new Set(cgvMovieSet)];
 
-  await newShowtimes(galMovieSet, lotMovieSet, bhdMovieSet, cgvMovieSet);
+  // await newShowtimes(galMovieSet, lotMovieSet, bhdMovieSet, cgvMovieSet);
+
+  // remove duplicate in movie
+  galMovie = [...new Set(galMovie)];
+  lotMovie = [...new Set(lotMovie)];
+  bhdMovie = [...new Set(bhdMovie)];
+  cgvMovie = [...new Set(cgvMovie)];
+
+  await newShowtimes(galMovie, lotMovie, bhdMovie, cgvMovie);
+
   console.log("Get Movies Done");
+  console.log("section end at: " + new Date());
 }
-async function newShowtimes(
-  galMovieSet,
-  lotMovieSet,
-  bhdMovieSet,
-  cgvMovieSet
-) {
+async function newShowtimes(galMovie, lotMovie, bhdMovie, cgvMovie) {
   console.log("Updating Showtimes");
 
   connection.query("delete from wp_showtimes", function (err, results, fields) {
@@ -835,11 +853,11 @@ async function newShowtimes(
 
   await newGalShowtimes();
   await delay(3000);
-  await newBhdShowtimes(bhdMovieSet);
+  await newBhdShowtimes(bhdMovie);
   await delay(3000);
-  await newLotShowtimes(lotMovieSet);
+  await newLotShowtimes();
   await delay(3000);
-  await newCgvShowtimes(cgvMovieSet);
+  await newCgvShowtimes(cgvMovie);
   await delay(3000);
 }
 
@@ -908,7 +926,6 @@ async function newLotShowtimes() {
             }
           } catch (error) {}
         }
-        console.log("Inserted Lotte Showtimes");
         resolve();
       }
     );
@@ -1094,29 +1111,29 @@ function insertShowtimes(showtimes) {
   );
 }
 
-// cron.schedule("0 4 * * *", getMovies);
-// startPuppeteer().then(async () => {
-//   async function run() {
-//     createShowtimes();
-//     createCinemas();
-//     await delay(5000);
-//     await createCinema();
-//     await delay(5000);
-//     createLocations();
-//     await delay(5000);
-//     createMovies();
-//     await delay(5000);
-//     await getMovies();
-//     await delay(5000);
-//   }
-//   await run();
-// });
-
+cron.schedule("0 4 * * *", getMovies);
 startPuppeteer().then(async () => {
   async function run() {
+    createShowtimes();
+    createCinemas();
+    await delay(5000);
+    await createCinema();
+    await delay(5000);
+    createLocations();
+    await delay(5000);
+    createMovies();
     await delay(5000);
     await getMovies();
     await delay(5000);
   }
   await run();
 });
+
+// startPuppeteer().then(async () => {
+//   async function run() {
+//     await delay(5000);
+//     await getMovies();
+//     await delay(5000);
+//   }
+//   await run();
+// });
