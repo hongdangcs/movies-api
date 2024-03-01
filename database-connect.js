@@ -28,7 +28,7 @@ const getSession = require("./bhd/get-session");
 
 let browser;
 async function startPuppeteer() {
-  browser = await puppeteer.launch({ headless: false });
+  browser = await puppeteer.launch({ headless: "new" });
 }
 
 const connection = mysql.createConnection({
