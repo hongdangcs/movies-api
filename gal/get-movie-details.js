@@ -33,7 +33,7 @@ async function getGalMovieDetails(movieId) {
       movieDetails = {
         movie_id_gal: movieId,
         movie_name: movie.name,
-        poster: movie.imageLandscape,
+        poster: movie.imagePortrait,
         description: description,
         director: directorsString,
         cast: actorsString,

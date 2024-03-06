@@ -47,7 +47,7 @@ function createCinemas() {
     "Create table if not exists wp_cinemas (id int(11) NOT NULL AUTO_INCREMENT, cinemas_id varchar(255) NOT NULL, cinemas_name varchar(255) NOT NULL, cinemas_link varchar(255), icon_link varchar(255) ,PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
       insertCinemasCheck();
     }
@@ -57,7 +57,7 @@ function createCinemas() {
 function insertCinemasCheck() {
   connection.query("select * from wp_cinemas", function (err, results, fields) {
     if (err) {
-      console.log(err);
+      insertErrorLogs(err);
     }
     if (results.length == 0) {
       insertCinemas(
@@ -94,7 +94,7 @@ function insertCinemas(cinemas_id, cinemas_name, cinemas_link, icon_link) {
     [cinemas_id, cinemas_name, cinemas_link, icon_link],
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -105,7 +105,7 @@ async function createCinema() {
     "Create table if not exists wp_cinema (id int(11) NOT NULL AUTO_INCREMENT, cinema_id varchar(255) NOT NULL, cinema_name varchar(255) NOT NULL, cinemas_id varchar(255) NOT NULL, city_id varchar(255) NOT NULL, address text NOT NULL, latitude varchar(255), longitude varchar(255), PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -117,7 +117,7 @@ async function createCinema() {
     "select * from wp_cinema",
     async function (err, results, fields) {
       if (err) {
-          console.log(err);
+        insertErrorLogs(err);
         }
       if (results.length == 0) {
         await insertLotCinema();
@@ -168,7 +168,7 @@ async function insertLotCinema() {
       });
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
 }
 
@@ -188,7 +188,7 @@ async function insertGalCinema() {
       });
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
 }
 
@@ -208,7 +208,7 @@ async function insertBhdCinema() {
       });
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
 }
 
@@ -229,7 +229,7 @@ async function insertCgvCinema() {
     });
   } catch (error) {
     {
-      console.log(err);
+      insertErrorLogs(error);
     }
   }
 }
@@ -248,7 +248,7 @@ function insertCinema(
     [cinema_id, cinema_name, cinemas_id, city_id, address, latitude, longitude],
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -259,7 +259,7 @@ function createLocations() {
     "Create table if not exists wp_locations (id int(11) NOT NULL AUTO_INCREMENT, location_name varchar(255) NOT NULL, location_id_gal varchar(255), location_id_cgv varchar(255), location_id_lot varchar(255), location_id_bhd varchar(255), PRIMARY KEY (id))",
     async function (err, results, fields) {
       if (err) {
-          console.log(err);
+        insertErrorLogs(err);
         }
       await insertLocationsCheck();
     }
@@ -288,7 +288,7 @@ function insertLocationsCheck() {
     "select * from wp_locations",
     async function (err, results, fields) {
       if (err) {
-          console.log(err);
+        insertErrorLogs(err);
         }
       if (results.length == 0) {
         await insertLocations();
@@ -517,7 +517,7 @@ function insertLocation(
     ],
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -528,20 +528,20 @@ function createMovies() {
     "create table if not exists wp_movies (id int(11) NOT NULL AUTO_INCREMENT, movie_id_gal varchar(255), movie_id_lot varchar(255), movie_id_bhd varchar(255), movie_id_cgv varchar(255), movie_name varchar(255) NOT NULL, is_showing boolean, poster varchar(255), description text, director varchar(255), cast text, running_time varchar(255), trailer varchar(255), age varchar(255), genre varchar(255),  PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
 }
 
 async function getMovies() {
-  console.log("Getting Movies");
-  console.log("section start at: " + new Date());
+  insertErrorLogs("Getting Movies");
+  insertErrorLogs("section start at: " + new Date());
   connection.query(
     "update wp_movies set is_showing = null",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -559,7 +559,7 @@ async function getMovies() {
     "select movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv from wp_movies",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
       results.forEach((movie) => {
         if (movie.movie_id_gal) {
@@ -589,10 +589,10 @@ async function getMovies() {
               movieDetails.is_showing = false;
               insertMovie(movieDetails);
             } else {
-              console.log("ERROR: " + movie + " Details not found");
+              insertErrorLogs("ERROR: " + movie + " Details not found");
             }
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
           galMovieSet.add(movie);
         } else {
@@ -601,16 +601,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get Gal Comming Done");
+      insertErrorLogs("Get Gal Comming Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -624,7 +624,7 @@ async function getMovies() {
             movieDetails.is_showing = false;
             insertMovie(movieDetails);
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
           lotMovieSet.add(movie);
         } else {
@@ -633,16 +633,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get Lot Comming Done");
+      insertErrorLogs("Get Lot Comming Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -657,7 +657,7 @@ async function getMovies() {
             movieDetails.is_showing = false;
             insertMovie(movieDetails);
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
           bhdMovieSet.add(movie);
         } else {
@@ -666,16 +666,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get BHD Comming Done");
+      insertErrorLogs("Get BHD Comming Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -691,7 +691,7 @@ async function getMovies() {
               [movie, movie.split("_")[0]],
               function (err, results, fields) {
                 if (err) {
-                  console.log(err);
+                  insertErrorLogs(err);
                 }
               }
             );
@@ -701,7 +701,7 @@ async function getMovies() {
               movieDetails.is_showing = false;
               insertMovie(movieDetails);
             } catch (error) {
-              console.log(error);
+              insertErrorLogs(error);
             }
           }
         } else {
@@ -710,16 +710,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get CGV Comming Done");
+      insertErrorLogs("Get CGV Comming Done");
     });
   } catch (error) {
-    console.log("Error GET CGV COMMING: " + error);
+    insertErrorLogs("Error GET CGV COMMING: " + error);
   }
   try {
     await delay(5000);
@@ -733,9 +733,9 @@ async function getMovies() {
             let movieDetails = await getLotMovieDetails(movie);
             movieDetails.is_showing = true;
             insertMovie(movieDetails);
-            console.log("Get LOTTE Showing Done");
+            insertErrorLogs("Get LOTTE Showing Done");
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
         } else {
           connection.query(
@@ -743,7 +743,7 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
@@ -751,7 +751,7 @@ async function getMovies() {
       }
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -766,7 +766,7 @@ async function getMovies() {
             movieDetails.is_showing = true;
             insertMovie(movieDetails);
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
         } else {
           connection.query(
@@ -774,16 +774,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get BHD Showing Done");
+      insertErrorLogs("Get BHD Showing Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -799,7 +799,7 @@ async function getMovies() {
               [movie, movie.split("_")[0]],
               function (err, results, fields) {
                 if (err) {
-                  console.log(err);
+                  insertErrorLogs(err);
                 }
               }
             );
@@ -809,7 +809,7 @@ async function getMovies() {
               movieDetails.is_showing = true;
               insertMovie(movieDetails);
             } catch (error) {
-              console.log(error);
+              insertErrorLogs(error);
             }
           }
         } else {
@@ -818,16 +818,16 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
-      console.log("Get CGV Showing Done");
+      insertErrorLogs("Get CGV Showing Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   try {
     await delay(5000);
@@ -843,10 +843,10 @@ async function getMovies() {
               movieDetails.is_showing = true;
               insertMovie(movieDetails);
             } else {
-              console.log("ERROR: " + movie + " Details not found");
+              insertErrorLogs("ERROR: " + movie + " Details not found");
             }
           } catch (error) {
-            console.log(error);
+            insertErrorLogs(error);
           }
         } else {
           connection.query(
@@ -854,22 +854,22 @@ async function getMovies() {
             [movie],
             function (err, results, fields) {
               if (err) {
-                console.log(err);
+                insertErrorLogs(err);
               }
             }
           );
         }
       }
 
-      console.log("Get GAL Showing Done");
+      insertErrorLogs("Get GAL Showing Done");
     });
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   // try {
   //   await updateShowtimes();
   // } catch (error) {
-  //   console.log(error);
+  //   insertErrorLogs(error);
   // }
   // remove duplicate movies in each set
   // galMovieSet = [...new Set(galMovieSet)];
@@ -887,17 +887,17 @@ async function getMovies() {
 
   await newShowtimes(galMovie, lotMovie, bhdMovie, cgvMovie);
 
-  console.log("Get Movies Done");
-  console.log("section end at: " + new Date());
+  insertErrorLogs("Get Movies Done");
+  insertErrorLogs("section end at: " + new Date());
 }
 async function newShowtimes(galMovie, lotMovie, bhdMovie, cgvMovie) {
-  console.log("Updating Showtimes");
+  insertErrorLogs("Updating Showtimes");
 
   connection.query("delete from wp_showtimes", function (err, results, fields) {
     if (err) {
-      console.log(err);
+      insertErrorLogs(err);
     }
-    console.log("Deleted old showtimes");
+    insertErrorLogs("Deleted old showtimes");
   });
   await delay(3000);
 
@@ -918,7 +918,7 @@ async function newGalShowtimes() {
       await delay(100);
       insertShowtimes(showtime);
     }
-    console.log("Inserted Galaxy Showtimes");
+    insertErrorLogs("Inserted Galaxy Showtimes");
   });
 }
 
@@ -928,14 +928,14 @@ async function newBhdShowtimes(bhdMovieSet) {
   try {
     session = await getSession(bhdMovieSet[0]);
   } catch (error) {
-    console.log(error);
+    insertErrorLogs(error);
   }
   for (const movie of bhdMovieSet) {
     if (session == "" || session == null) {
       try {
         session = await getSession(movie);
       } catch (error) {
-        console.log(error);
+        insertErrorLogs(error);
       }
     }
     for (let date of getCommingDate(7)) {
@@ -949,10 +949,11 @@ async function newBhdShowtimes(bhdMovieSet) {
           }
         });
       } catch (error) {
-        console.log(error);
+        insertErrorLogs(error);
       }
     }
   }
+  insertErrorLogs("Inserted BHD Showtimes");
 }
 async function newLotShowtimes() {
   await new Promise((resolve, reject) => {
@@ -960,7 +961,7 @@ async function newLotShowtimes() {
       "select cinema_id from wp_cinema where cinemas_id = 'LOT'",
       async function (err, results, fields) {
         if (err) {
-          console.log(err);
+          insertErrorLogs(err);
         }
         for (const result of results) {
           try {
@@ -976,13 +977,15 @@ async function newLotShowtimes() {
                 }
               );
             }
-          } catch (error) {}
+          } catch (error) {
+            insertErrorLogs(error);
+          }
         }
         resolve();
       }
     );
   });
-  console.log("Inserted Lotte Showtimes");
+  insertErrorLogs("Inserted Lotte Showtimes");
 }
 async function newCgvShowtimes(cgvMovieSet) {
   for (const movie of cgvMovieSet) {
@@ -997,11 +1000,11 @@ async function newCgvShowtimes(cgvMovieSet) {
           }
         });
       } catch (error) {
-        console.log(error);
+        insertErrorLogs(error);
       }
     }
   }
-  console.log("Inserted CGV Showtimes");
+  insertErrorLogs("Inserted CGV Showtimes");
 }
 
 function insertMovie(movieDetails) {
@@ -1025,7 +1028,7 @@ function insertMovie(movieDetails) {
     ],
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -1036,7 +1039,7 @@ function createShowtimes() {
     "create table if not exists wp_showtimes (id int(11) NOT NULL AUTO_INCREMENT,cinemas_id varchar(255), movie_id varchar(255), cinema_id varchar(255), date varchar(20), start_time varchar(20), movie_format varchar(255), PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
       }
     }
   );
@@ -1044,15 +1047,15 @@ function createShowtimes() {
 
 async function updateShowtimes() {
   // remove all old showtimes
-  console.log("Updating Showtimes");
+  insertErrorLogs("Updating Showtimes");
   await new Promise((resolve, reject) => {
     connection.query(
       "delete from wp_showtimes",
       function (err, results, fields) {
         if (err) {
-          console.log(err);
+          insertErrorLogs(err);
         }
-        console.log("Deleted old showtimes");
+        insertErrorLogs("Deleted old showtimes");
         resolve();
       }
     );
@@ -1064,14 +1067,14 @@ async function updateShowtimes() {
       await delay(100);
       insertShowtimes(showtime);
     }
-    console.log("Inserted Galaxy Showtimes");
+    insertErrorLogs("Inserted Galaxy Showtimes");
   });
   await new Promise((resolve, reject) => {
     connection.query(
       "select movie_id_bhd, movie_id_cgv from wp_movies where (movie_id_bhd is not null or movie_id_cgv is not null) AND is_showing is not null",
       async function (err, results, fields) {
         if (err) {
-          console.log(err);
+          insertErrorLogs(err);
         }
 
         await delay(3000);
@@ -1083,7 +1086,9 @@ async function updateShowtimes() {
             if (session == "" || session == null) {
               try {
                 session = await getSession(movie.movie_id_bhd);
-              } catch (error) {}
+              } catch (error) {
+                insertErrorLogs(error);
+              }
             }
             for (let date of getCommingDate(7)) {
               date = "" + date;
@@ -1097,7 +1102,9 @@ async function updateShowtimes() {
                     }
                   }
                 );
-              } catch (error) {}
+              } catch (error) {
+                insertErrorLogs(error);
+              }
             }
           }
           if (movie.movie_id_cgv) {
@@ -1114,11 +1121,13 @@ async function updateShowtimes() {
                     }
                   }
                 );
-              } catch (error) {}
+              } catch (error) {
+                insertErrorLogs(error);
+              }
             }
           }
         }
-        console.log("Inserted BHD and CGV Showtimes");
+        insertErrorLogs("Inserted BHD and CGV Showtimes");
         resolve();
       }
     );
@@ -1128,7 +1137,7 @@ async function updateShowtimes() {
       "select cinema_id from wp_cinema where cinemas_id = 'LOT'",
       async function (err, results, fields) {
         if (err) {
-          console.log(err);
+          insertErrorLogs(err);
         }
         for (const result of results) {
           try {
@@ -1144,15 +1153,17 @@ async function updateShowtimes() {
                 }
               );
             }
-          } catch (error) {}
+          } catch (error) {
+            insertErrorLogs(error);
+          }
         }
-        console.log("Inserted Lotte Showtimes");
+        insertErrorLogs("Inserted Lotte Showtimes");
         resolve();
       }
     );
   });
 
-  console.log("Updated Showtimes");
+  insertErrorLogs("Updated Showtimes");
 }
 
 function insertShowtimes(showtimes) {
@@ -1168,7 +1179,30 @@ function insertShowtimes(showtimes) {
     ],
     function (err, results, fields) {
       if (err) {
-        console.log(err);
+        insertErrorLogs(err);
+      }
+    }
+  );
+}
+
+function createErrorLogs() {
+  connection.query(
+    "create table if not exists wp_error_logs (id int(11) NOT NULL AUTO_INCREMENT, error_message text, error_time datetime, PRIMARY KEY (id))",
+    function (err, results, fields) {
+      if (err) {
+        insertErrorLogs(err);
+      }
+    }
+  );
+}
+
+function insertErrorLogs(error_message) {
+  connection.query(
+    "insert into wp_error_logs(error_message, error_time) values(?, ?)",
+    [error_message, new Date()],
+    function (err, results, fields) {
+      if (err) {
+        insertErrorLogs(err);
       }
     }
   );
@@ -1180,6 +1214,7 @@ startPuppeteer().then(async () => {
     createShowtimes();
     createCinemas();
     createMovies();
+    createErrorLogs();
     await delay(5000);
     await createCinema();
     await delay(5000);
