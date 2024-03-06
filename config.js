@@ -2,7 +2,7 @@ module.exports = {
   db: {
     database_host_name: "localhost",
     database_user_name: "sql_rapphim_vn",
-    database_password: "x3ShHsp8LPTxJKy8",
+    database_password: "",
     database_name: "sql_rapphim_vn",
   },
   gal: {
