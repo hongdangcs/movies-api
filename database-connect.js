@@ -25,6 +25,7 @@ const getLotShowtimes = require("./lot/get-showtimes");
 const getCgvShowtimes = require("./cgv/get-showtimes");
 const getCgvCinema = require("./cgv/get-cinemas");
 const getSession = require("./bhd/get-session");
+const getBuildId = require("./gal/get-buildId");
 
 let browser;
 async function startPuppeteer() {
@@ -525,7 +526,7 @@ function insertLocation(
 
 function createMovies() {
   connection.query(
-    "create table if not exists wp_movies (id int(11) NOT NULL AUTO_INCREMENT, movie_id_gal varchar(255), movie_id_lot varchar(255), movie_id_bhd varchar(255), movie_id_cgv varchar(255), movie_name varchar(255) NOT NULL, is_showing boolean, poster varchar(255), description text, director varchar(255), cast text, running_time varchar(255), trailer varchar(255), age varchar(255), genre varchar(255),  PRIMARY KEY (id))",
+    "create table if not exists wp_movies (id int(11) NOT NULL AUTO_INCREMENT, movie_id_gal varchar(255), movie_id_lot varchar(255), movie_id_bhd varchar(255), movie_id_cgv varchar(255), movie_name varchar(255) NOT NULL, is_showing boolean, poster varchar(255), description text, director varchar(255), cast text, running_time varchar(255), trailer varchar(255), age varchar(255), genre varchar(255), release_date varchar(20),  PRIMARY KEY (id))",
     function (err, results, fields) {
       if (err) {
         insertErrorLogs(err);
@@ -554,6 +555,9 @@ async function getMovies() {
   let lotMovie = [];
   let bhdMovie = [];
   let cgvMovie = [];
+
+  const buildId = await getBuildId();
+  console.log(buildId);
 
   connection.query(
     "select movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv from wp_movies",
@@ -584,7 +588,7 @@ async function getMovies() {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         if (!galMovieSet.has(movie)) {
           try {
-            let movieDetails = await getGalMovieDetails(movie);
+            let movieDetails = await getGalMovieDetails(movie, buildId);
             if (movieDetails.movie_name) {
               movieDetails.is_showing = false;
               insertMovie(movieDetails);
@@ -838,7 +842,7 @@ async function getMovies() {
         if (!galMovieSet.has(movie)) {
           galMovieSet.add(movie);
           try {
-            let movieDetails = await getGalMovieDetails(movie);
+            let movieDetails = await getGalMovieDetails(movie, buildId);
             if (movieDetails.movie_name) {
               movieDetails.is_showing = true;
               insertMovie(movieDetails);
@@ -1009,7 +1013,7 @@ async function newCgvShowtimes(cgvMovieSet) {
 
 function insertMovie(movieDetails) {
   connection.query(
-    "insert into wp_movies(movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv, movie_name, is_showing, poster, description, director, cast, running_time, trailer, age, genre) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "insert into wp_movies(movie_id_gal, movie_id_lot, movie_id_bhd, movie_id_cgv, movie_name, is_showing, poster, description, director, cast, running_time, trailer, age, genre, release_date) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?)",
     [
       movieDetails.movie_id_gal,
       movieDetails.movie_id_lot,
@@ -1025,6 +1029,7 @@ function insertMovie(movieDetails) {
       movieDetails.trailer,
       movieDetails.age,
       movieDetails.genre,
+      movieDetails.release_date,
     ],
     function (err, results, fields) {
       if (err) {
@@ -1197,6 +1202,7 @@ function createErrorLogs() {
 }
 
 function insertErrorLogs(error_message) {
+  error_message = error_message.toString();
   connection.query(
     "insert into wp_error_logs(error_message, error_time) values(?, ?)",
     [error_message, new Date()],
@@ -1208,7 +1214,6 @@ function insertErrorLogs(error_message) {
   );
 }
 
-cron.schedule("0 4 * * *", getMovies);
 startPuppeteer().then(async () => {
   async function run() {
     createShowtimes();
@@ -1226,6 +1231,8 @@ startPuppeteer().then(async () => {
     await delay(5000);
   }
   await run();
+
+  cron.schedule("0 4 * * *", getMovies);
 });
 
 // startPuppeteer().then(async () => {

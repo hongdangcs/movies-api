@@ -1,10 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const getBuildId = require("./get-buildId");
 
-async function getGalMovieDetails(movieId) {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-  let buildId = await getBuildId();
+async function getGalMovieDetails(movieId, buildId) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   let config = {
     method: "get",
@@ -27,6 +24,8 @@ async function getGalMovieDetails(movieId) {
       let actorsString = actors.join(", ");
       let genres = movie.categories.map((categories) => categories.name);
       let genresString = genres.join(", ");
+      let releaseDate = movie.startDate;
+      releaseDate = releaseDate.split(" ")[0].replace(/-/g, "");
 
       let description = cheerio.load(movie.description);
       description = description.text();
@@ -41,6 +40,7 @@ async function getGalMovieDetails(movieId) {
         trailer: movie.trailer,
         age: movie.age,
         genre: genresString,
+        release_date: releaseDate,
       };
     })
     .catch((error) => {

@@ -16,6 +16,7 @@ async function getCgvMovieDetails(browser, movieId) {
   let duration = "";
   let age = "";
   let trailer = "";
+  let releaseDate = "";
   const page = await browser.newPage();
 
   try {
@@ -80,6 +81,14 @@ async function getCgvMovieDetails(browser, movieId) {
         (el) => el.textContent
       );
     } catch (error) {}
+    try {
+      releaseDate = await page.$eval(
+        ".movie-release.movie-info .std",
+        (el) => el.textContent
+      );
+      releaseDate = releaseDate.replace(/\s/g, "");
+      releaseDate = releaseDate.split("/").reverse().join("");
+    } catch (error) {}
 
     movieDetails = {
       movie_id_cgv: movieId,
@@ -92,6 +101,7 @@ async function getCgvMovieDetails(browser, movieId) {
       trailer: trailer,
       age: age,
       genre: genre,
+      release_date: releaseDate,
     };
   } catch (error) {
     console.error(error);

@@ -31,6 +31,7 @@ async function getLotMovieDetails(movieId) {
       let duration = movieData.PlayTime;
       let genre = movieData.MovieGenreName;
       let age = movieData.ViewGradeCode;
+      let releaseDate = movieData.ReleaseDate;
 
       let trailerData = response.data.Trailer.Items;
       let trailer = "";
@@ -49,6 +50,7 @@ async function getLotMovieDetails(movieId) {
         trailer: trailer,
         age: age,
         genre: genre,
+        release_date: releaseDate,
       };
     })
     .catch((error) => {

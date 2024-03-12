@@ -98,6 +98,7 @@ async function getBhdMovieDetails(movieId) {
       );
       let age = "";
       let genre = "";
+      let releaseDate = "";
 
       movieMetas.each((index, element) => {
         if ($(element).text().includes("Diễn viên")) {
@@ -115,6 +116,10 @@ async function getBhdMovieDetails(movieId) {
         if ($(element).text().includes("Đạo diễn")) {
           director = $(element).text().replace("Đạo diễn: ", "");
         }
+        if ($(element).text().includes("Khởi chiếu:")) {
+          releaseDate = $(element).text().replace("Khởi chiếu:", "");
+          releaseDate = releaseDate.split("/").reverse().join("");
+        }
       });
 
       movieDetails = {
@@ -128,6 +133,7 @@ async function getBhdMovieDetails(movieId) {
         trailer: trailer,
         age: age,
         genre: genre,
+        release_date: releaseDate,
       };
     })
     .catch((error) => {
