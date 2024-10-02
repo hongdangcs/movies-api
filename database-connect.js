@@ -1,6 +1,5 @@
 const puppeteer = require("puppeteer");
 const mysql = require("mysql2");
-const cron = require("node-cron");
 const getLotCinemas = require("./lot/get-cinemas");
 const getGalCinemas = require("./gal/get-cinemas");
 const { getLocations } = require("./gal/get-location");
@@ -1216,6 +1215,8 @@ function insertErrorLogs(error_message) {
 
 startPuppeteer().then(async (browser) => {
   async function run() {
+    console.log("Start");
+    
     createShowtimes();
     createCinemas();
     createMovies();
@@ -1232,6 +1233,8 @@ startPuppeteer().then(async (browser) => {
   }
   await run();
   await browser.close();
+  console.log("Done");
+  
   process.exit(0);
 });
 
