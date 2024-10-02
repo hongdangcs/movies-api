@@ -99,7 +99,9 @@ getBhdCinemas().then((data) => {
   console.log(data);
 });
 */
-
+if (typeof ReadableStream === 'undefined') {
+  global.ReadableStream = require('web-streams-polyfill').ReadableStream;
+}
 const axios = require("axios");
 const cheerio = require("cheerio");
 let config = {
@@ -144,7 +146,6 @@ async function getBhdCinemaDetails(cinemaLink) {
     .request(config)
     .then((response) => {
       const $ = cheerio.load(response.data);
-      console.log("Cinema details of: " + cinemaLink); // log data
       const cinemaName = $("#content .content .content--title").text();
       let cinemaAddress = $("#content .content ul li").first().text();
       let cinemaId = $("#content h1.title").first().text();

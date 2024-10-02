@@ -27,9 +27,9 @@ const getCgvCinema = require("./cgv/get-cinemas");
 const getSession = require("./bhd/get-session");
 const getBuildId = require("./gal/get-buildId");
 
-let browser;
 async function startPuppeteer() {
-  browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
+  const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
+  return browser;
 }
 
 const connection = mysql.createConnection({
@@ -1214,7 +1214,7 @@ function insertErrorLogs(error_message) {
   );
 }
 
-startPuppeteer().then(async () => {
+startPuppeteer().then(async (browser) => {
   async function run() {
     createShowtimes();
     createCinemas();

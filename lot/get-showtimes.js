@@ -24,9 +24,7 @@ async function getLotShowtimes(cinemaId, date) {
 
   await axios
     .request(config)
-    .then((response) => {
-      console.log(response.data);
-      
+    .then((response) => {      
       let data = response.data.PlaySeqs.Items;
       let movieFormats = response.data.PlaySeqsHeader.Items;
       data.forEach((showtime) => {
