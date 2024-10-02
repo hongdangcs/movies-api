@@ -1231,15 +1231,9 @@ startPuppeteer().then(async () => {
     await delay(5000);
   }
   await run();
-
-  cron.schedule("0 4 * * *", getMovies);
+  await browser.close();
+  process.exit(0);
 });
 
-// startPuppeteer().then(async () => {
-//   async function run() {
-//     await delay(5000);
-//     await getMovies();
-//     await delay(5000);
-//   }
-//   await run();
-// });
+
+

@@ -11,6 +11,6 @@ const getLotMovieDetails = require("./lot/get-movie-details");
 const getLotteShowingMovies = require("./lot/get-showing");
 const getLotShowtimes = require("./lot/get-showtimes");
 
-getLotShowtimes("1|0007|8045", 20241002).then((data) => {
+getLotShowtimes("1|0008|8020", "20241003").then((data) => {
   console.log(data);
 });
