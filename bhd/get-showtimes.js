@@ -14,6 +14,7 @@ async function bhdGetShowtimes(movieId, date, session) {
       date
     )}&f=${id}&nonce=${session}`,
   };
+  
   try {
     await axios
       .request(config)

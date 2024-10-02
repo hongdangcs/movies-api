@@ -32,7 +32,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 let config = {
   method: "get",
-  url: "https://bhdstar.vn/",
+  url: "https://bhdstar.vn/lich-chieu/",
 };
 async function getBhdShowingMovies() {
   let showingMoviesReturn = [];
@@ -40,13 +40,16 @@ async function getBhdShowingMovies() {
     .request(config)
     .then((response) => {
       const $ = cheerio.load(response.data);
-      let lists = $(".row .col.small-12.large-12 .film-slider");
+      let lists = $(".row.large-columns-5.medium-columns-3.small-columns-2");
       let comming = lists[0];
       let showingMovies = $(comming).find(".col.film-col-item");
       showingMovies.each((index, element) => {
         let movie = $(element);
         let movieId = movie.find("a").attr("data-id");
         let movieSlug = movie.find("a").attr("data-url");
+        if (movieId == undefined) {
+          return;
+        }
         movieSlug = movieSlug.split("/")[4].split("/")[0];
         showingMoviesReturn.push(movieId + "_" + movieSlug);
       });

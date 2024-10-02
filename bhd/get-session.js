@@ -9,6 +9,8 @@ async function getSession(movieId) {
     maxBodyLength: Infinity,
     url: "https://bhdstar.vn/dat-ve/?f=" + id + "#/",
   };
+  console.log(config.url);
+  
   try {
     await axios
       .request(config)

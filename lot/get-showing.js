@@ -6,7 +6,7 @@ let data = qs.stringify({
 });
 
 let config = {
-  method: "get",
+  method: "post",
   maxBodyLength: Infinity,
   url: "https://www.lottecinemavn.com/LCWS/Movie/MovieData.aspx",
   headers: {
