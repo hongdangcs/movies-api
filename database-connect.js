@@ -26,9 +26,9 @@ const getCgvCinema = require("./cgv/get-cinemas");
 const getSession = require("./bhd/get-session");
 const getBuildId = require("./gal/get-buildId");
 
+let browser
 async function startPuppeteer() {
-  const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
-  return browser;
+   browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
 }
 
 const connection = mysql.createConnection({
@@ -1213,7 +1213,7 @@ function insertErrorLogs(error_message) {
   );
 }
 
-startPuppeteer().then(async (browser) => {
+startPuppeteer().then(async () => {
   async function run() {
     console.log("Start");
     
@@ -1235,8 +1235,6 @@ startPuppeteer().then(async (browser) => {
   await browser.close();
   console.log("Done");
   
-  process.exit(0);
 });
 
-
-
+process.exit(0);
