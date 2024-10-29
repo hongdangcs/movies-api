@@ -1,3 +1,6 @@
+const {image_path_save} = require("../config");
+const savePoster = require("../download-image");
+
 async function getCgvMovieDetails(browser, movieId) {
   let id = "";
   if (movieId.includes("_")) {
@@ -5,11 +8,12 @@ async function getCgvMovieDetails(browser, movieId) {
   } else {
     id = movieId;
   }
+  const imagePath = image_path_save + movieId + ".jpg";
 
   let movieDetails = {};
   let movieName = "";
   let movieImage = "";
-  let descreptionText = "";
+  let description = "";
   let director = "";
   let cast = "";
   let genre = "";
@@ -19,82 +23,102 @@ async function getCgvMovieDetails(browser, movieId) {
   let releaseDate = "";
   const page = await browser.newPage();
 
+  let movieImageURL;
   try {
     await page.goto(`https://www.cgv.vn/default/${id}.html`);
     //   await page.waitForNavigation();
     try {
       movieName = await page.$eval(
-        ".product-view .product-shop .product-name .h1",
-        (el) => el.textContent
+          ".product-view .product-shop .product-name .h1",
+          (el) => el.textContent
       );
-    } catch (error) {}
+    } catch (error) {
+    }
     try {
       movieImage = await page.$eval(
-        ".product-view .product-img-box #image-main",
-        (el) => el.src
+          ".product-view .product-img-box #image-main",
+          (el) => el.src
       );
-    } catch (error) {}
+      const image_ext = movieImage.split(".").pop();
+      movieImageURL = `${movieId}.${image_ext}`;
+      let error = await savePoster(movieImage, movieImageURL);
+      if (error === false) {
+        console.log("Movie ID error: ", movieId);
+      } else {
+        movieImage = movieImageURL;
+      }
+    } catch (error) {
+    }
     try {
       let descreption = await page.$$(
-        ".product-view .product-collateral .tab-content"
+          ".product-view .product-collateral .tab-content"
       );
       try {
-        descreptionText = await descreption[0].$eval(
-          ".std",
-          (el) => el.textContent
+        description = await descreption[0].$eval(
+            ".std",
+            (el) => el.textContent
         );
-      } catch (error) {}
+      } catch (error) {
+      }
       try {
         trailer = await descreption[1].$eval(
-          ".product_view_trailer iframe",
-          (el) => el.src
+            ".product_view_trailer iframe",
+            (el) => el.src
         );
-      } catch (error) {}
-    } catch (error) {}
+      } catch (error) {
+      }
+    } catch (error) {
+    }
     try {
       director = await page.$eval(
-        ".movie-director.movie-info .std",
-        (el) => el.textContent
+          ".movie-director.movie-info .std",
+          (el) => el.textContent
       );
-    } catch (error) {}
+    } catch (error) {
+    }
     try {
       let movieActress = await page.$$(".movie-actress.movie-info");
 
       try {
         cast = await movieActress[0].$eval(".std", (el) => el.textContent);
-      } catch (error) {}
+      } catch (error) {
+      }
       try {
         duration = await movieActress[1].$eval(".std", (el) => el.textContent);
       } catch (error) {
         console.log("duration not found" + movieId);
       }
-    } catch (error) {}
+    } catch (error) {
+    }
     try {
       genre = await page.$eval(
-        ".movie-genre.movie-info .std",
-        (el) => el.textContent
+          ".movie-genre.movie-info .std",
+          (el) => el.textContent
       );
-    } catch (error) {}
+    } catch (error) {
+    }
     try {
       age = await page.$eval(
-        ".movie-rating.movie-rated-web .std",
-        (el) => el.textContent
+          ".movie-rating.movie-rated-web .std",
+          (el) => el.textContent
       );
-    } catch (error) {}
+    } catch (error) {
+    }
     try {
       releaseDate = await page.$eval(
-        ".movie-release.movie-info .std",
-        (el) => el.textContent
+          ".movie-release.movie-info .std",
+          (el) => el.textContent
       );
       releaseDate = releaseDate.replace(/\s/g, "");
       releaseDate = releaseDate.split("/").reverse().join("");
-    } catch (error) {}
+    } catch (error) {
+    }
 
     movieDetails = {
       movie_id_cgv: movieId,
       movie_name: movieName,
       poster: movieImage,
-      description: descreptionText,
+      description: description,
       director: director,
       cast: cast,
       running_time: duration,

@@ -69,6 +69,7 @@ module.exports = getBhdMovieDetails;
 */
 const axios = require("axios");
 const cheerio = require("cheerio");
+const savePoster = require("../download-image");
 
 async function getBhdMovieDetails(movieId) {
   let movieIdSlug = movieId.split("_")[1];
@@ -82,59 +83,67 @@ async function getBhdMovieDetails(movieId) {
 
   await axios
     .request(config)
-    .then((response) => {
-      let $ = cheerio.load(response.data);
-      let movieName = $("#main #content h1.title.text-uppercase").text();
-      let movieImage = $("#main #content .img-inner.dark img").attr("src");
-      let descreption = $("#main #content .excerpt").text();
-      // remove \n and \t
-      descreption = descreption.replace(/\n|\t/g, "");
-      let movieMetas = $("#main #content .meta p");
-      let director = "";
-      let cast = "";
-      let duration = "";
-      let trailer = $("#main #content .section-content .trailer iframe").attr(
-        "src"
-      );
-      let age = "";
-      let genre = "";
-      let releaseDate = "";
+    .then(async (response) => {
+        let $ = cheerio.load(response.data);
+        let movieName = $("#main #content h1.title.text-uppercase").text();
+        let movieImage = $("#main #content .img-inner.dark img").attr("src");
+        let descreption = $("#main #content .excerpt").text();
+        // remove \n and \t
+        descreption = descreption.replace(/\n|\t/g, "");
+        let movieMetas = $("#main #content .meta p");
+        let director = "";
+        let cast = "";
+        let duration = "";
+        let trailer = $("#main #content .section-content .trailer iframe").attr(
+            "src"
+        );
+        let age = "";
+        let genre = "";
+        let releaseDate = "";
 
-      movieMetas.each((index, element) => {
-        if ($(element).text().includes("Diễn viên")) {
-          cast = $(element).text().replace("Diễn viên: ", "");
-        }
-        if ($(element).text().includes("Thời lượng")) {
-          duration = $(element).text().replace("Thời lượng: ", "");
-        }
-        if ($(element).text().includes("Phân loại:")) {
-          age = $(element).find(".text-uppercae").text();
-        }
-        if ($(element).text().includes("Thể loại")) {
-          genre = $(element).text().replace("Thể loại: ", "");
-        }
-        if ($(element).text().includes("Đạo diễn")) {
-          director = $(element).text().replace("Đạo diễn: ", "");
-        }
-        if ($(element).text().includes("Khởi chiếu:")) {
-          releaseDate = $(element).text().replace("Khởi chiếu:", "");
-          releaseDate = releaseDate.split("/").reverse().join("");
-        }
-      });
+        const image_ext = movieImage.split(".").pop();
+        let  imagePath = `${movieId}.${image_ext}`;
 
-      movieDetails = {
-        movie_id_bhd: movieId,
-        movie_name: movieName,
-        poster: movieImage,
-        description: descreption,
-        director: director,
-        cast: cast,
-        running_time: duration,
-        trailer: trailer,
-        age: age,
-        genre: genre,
-        release_date: releaseDate,
-      };
+        let error = await savePoster(movieImage, imagePath);
+        if  (error === false) {
+            console.log("Movie ID error: ", movieId);
+            imagePath = movieImage;
+        }
+        movieMetas.each((index, element) => {
+            if ($(element).text().includes("Diễn viên")) {
+                cast = $(element).text().replace("Diễn viên: ", "");
+            }
+            if ($(element).text().includes("Thời lượng")) {
+                duration = $(element).text().replace("Thời lượng: ", "");
+            }
+            if ($(element).text().includes("Phân loại:")) {
+                age = $(element).find(".text-uppercae").text();
+            }
+            if ($(element).text().includes("Thể loại")) {
+                genre = $(element).text().replace("Thể loại: ", "");
+            }
+            if ($(element).text().includes("Đạo diễn")) {
+                director = $(element).text().replace("Đạo diễn: ", "");
+            }
+            if ($(element).text().includes("Khởi chiếu:")) {
+                releaseDate = $(element).text().replace("Khởi chiếu:", "");
+                releaseDate = releaseDate.split("/").reverse().join("");
+            }
+        });
+
+        movieDetails = {
+            movie_id_bhd: movieId,
+            movie_name: movieName,
+            poster: imagePath,
+            description: descreption,
+            director: director,
+            cast: cast,
+            running_time: duration,
+            trailer: trailer,
+            age: age,
+            genre: genre,
+            release_date: releaseDate,
+        };
     })
     .catch((error) => {
       console.log(error);

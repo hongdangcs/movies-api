@@ -1,9 +1,10 @@
 const axios = require("axios");
 const qs = require("qs");
+const savePoster = require('../download-image');
 
 async function getLotMovieDetails(movieId) {
   await new Promise((resolve) => setTimeout(resolve, 3000));
-  movieDetails = {};
+    let movieDetails = {};
 
   let data = qs.stringify({
     paramList:
@@ -21,37 +22,47 @@ async function getLotMovieDetails(movieId) {
 
   await axios
     .request(config)
-    .then((response) => {
-      let movieData = response.data.Movie;
-      let name = movieData.MovieName;
-      let poster = movieData.PosterURL;
-      let description = movieData.Synopsis;
-      let director = movieData.DirectorName;
-      let cast = movieData.ActorName;
-      let duration = movieData.PlayTime;
-      let genre = movieData.MovieGenreName;
-      let age = movieData.ViewGradeCode;
-      let releaseDate = movieData.ReleaseDate;
+    .then(async (response) => {
+        let movieData = response.data.Movie;
+        let name = movieData.MovieName;
+        let poster = movieData.PosterURL;
+        let description = movieData.Synopsis;
+        let director = movieData.DirectorName;
+        let cast = movieData.ActorName;
+        let duration = movieData.PlayTime;
+        let genre = movieData.MovieGenreName;
+        let age = movieData.ViewGradeCode;
+        let releaseDate = movieData.ReleaseDate;
 
-      let trailerData = response.data.Trailer.Items;
-      let trailer = "";
-      if (trailerData.length > 0) {
-        trailer = trailerData[0].MediaURL;
-      }
+        let trailerData = response.data.Trailer.Items;
+        let trailer = "";
+        if (trailerData.length > 0) {
+            trailer = trailerData[0].MediaURL;
+        }
 
-      movieDetails = {
-        movie_id_lot: movieId,
-        movie_name: name,
-        poster: poster,
-        description: description,
-        director: director,
-        cast: cast,
-        running_time: duration,
-        trailer: trailer,
-        age: age,
-        genre: genre,
-        release_date: releaseDate,
-      };
+        let poster_ext = poster.split(".").pop();
+        let image_name = movieId + "." + poster_ext;
+
+        let error = await savePoster(poster, image_name);
+        if (error === false) {
+            console.log("Movie ID error: ", movieId);
+            image_name = poster;
+        }
+
+
+        movieDetails = {
+            movie_id_lot: movieId,
+            movie_name: name,
+            poster: image_name,
+            description: description,
+            director: director,
+            cast: cast,
+            running_time: duration,
+            trailer: trailer,
+            age: age,
+            genre: genre,
+            release_date: releaseDate,
+        };
     })
     .catch((error) => {
       console.log(error);
@@ -59,5 +70,6 @@ async function getLotMovieDetails(movieId) {
 
   return movieDetails;
 }
+
 
 module.exports = getLotMovieDetails;
